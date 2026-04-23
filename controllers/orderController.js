@@ -104,8 +104,11 @@ const updateOrderToDelivered = async (req, res) => {
   if (order) {
     order.isDelivered = true;
     order.deliveredAt = Date.now();
+    order.orderStatus = 'Delivered';
 
     const updatedOrder = await order.save();
+    
+    req.app.get('io').to(`order_${order._id}`).emit('statusUpdate', updatedOrder);
 
     res.json(updatedOrder);
   } else {
@@ -137,6 +140,9 @@ const acceptOrder = async (req, res) => {
     order.orderStatus = 'Accepted';
     
     const updatedOrder = await order.save();
+    
+    req.app.get('io').to(`order_${order._id}`).emit('statusUpdate', updatedOrder);
+    
     res.json(updatedOrder);
   } else {
     res.status(404).json({ message: 'Order not found' });
