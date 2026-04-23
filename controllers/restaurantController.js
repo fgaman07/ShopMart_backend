@@ -64,6 +64,7 @@ const createRestaurant = async (req, res) => {
       image: 'https://via.placeholder.com/300',
       description: 'Sample description',
       address: 'Sample address',
+      operatingHours: { openTime: '09:00', closeTime: '22:00' },
     });
 
     const createdRestaurant = await restaurant.save();

@@ -1,4 +1,6 @@
 import Order from '../models/orderModel.js';
+import Product from '../models/productModel.js';
+import Restaurant from '../models/restaurantModel.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -18,6 +20,21 @@ const addOrderItems = async (req, res) => {
     res.status(400).json({ message: 'No order items' });
     return;
   } else {
+    // Check operating hours
+    if (orderItems.length > 0) {
+      const firstProduct = await Product.findById(orderItems[0].id).populate('restaurant');
+      if (firstProduct && firstProduct.restaurant) {
+        const restaurant = firstProduct.restaurant;
+        if (restaurant.operatingHours) {
+          const { openTime, closeTime } = restaurant.operatingHours;
+          const now = new Date();
+          const currentTime = now.toLocaleTimeString('en-US', { hour12: false, hour: "2-digit", minute: "2-digit" });
+          if (currentTime < openTime || currentTime > closeTime) {
+            return res.status(400).json({ message: `Restaurant is currently closed. Operating hours: ${openTime} - ${closeTime}` });
+          }
+        }
+      }
+    }
     const order = new Order({
       orderItems: orderItems.map((x) => ({
         ...x,
