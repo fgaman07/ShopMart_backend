@@ -5,7 +5,20 @@ import Product from '../models/productModel.js';
 // @access  Public
 const getProducts = async (req, res) => {
   try {
-    const products = await Product.find({});
+    const keyword = req.query.keyword
+      ? {
+          name: {
+            $regex: req.query.keyword,
+            $options: 'i',
+          },
+        }
+      : {};
+
+    const restaurant = req.query.restaurant
+      ? { restaurant: req.query.restaurant }
+      : {};
+
+    const products = await Product.find({ ...keyword, ...restaurant });
     
     // Map _id to id to maintain frontend compatibility
     const formattedProducts = products.map(p => {
