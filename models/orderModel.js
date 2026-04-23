@@ -7,6 +7,24 @@ const orderSchema = mongoose.Schema(
       required: true,
       ref: 'User',
     },
+    driver: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    orderStatus: {
+      type: String,
+      enum: ['Pending', 'Accepted', 'Preparing', 'Ready', 'PickedUp', 'Delivered'],
+      default: 'Pending',
+    },
+    deliveryLocation: {
+      lat: Number,
+      lng: Number,
+    },
+    pickupLocation: {
+      lat: Number,
+      lng: Number,
+    },
     orderItems: [
       {
         title: { type: String, required: true },

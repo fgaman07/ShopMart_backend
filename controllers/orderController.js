@@ -113,6 +113,36 @@ const updateOrderToDelivered = async (req, res) => {
   }
 };
 
+// @desc    Get available orders for drivers
+// @route   GET /api/orders/available
+// @access  Private/Driver
+const getAvailableOrders = async (req, res) => {
+  // Find orders that don't have a driver assigned yet
+  const orders = await Order.find({ driver: null, isPaid: true }).populate('user', 'id name');
+  res.json(orders);
+};
+
+// @desc    Accept order as a driver
+// @route   PUT /api/orders/:id/accept
+// @access  Private/Driver
+const acceptOrder = async (req, res) => {
+  const order = await Order.findById(req.params.id);
+
+  if (order) {
+    if (order.driver) {
+      return res.status(400).json({ message: 'Order already accepted by another driver' });
+    }
+    
+    order.driver = req.user._id;
+    order.orderStatus = 'Accepted';
+    
+    const updatedOrder = await order.save();
+    res.json(updatedOrder);
+  } else {
+    res.status(404).json({ message: 'Order not found' });
+  }
+};
+
 export default {
   addOrderItems,
   getOrderById,
@@ -120,4 +150,6 @@ export default {
   getMyOrders,
   getOrders,
   updateOrderToDelivered,
+  getAvailableOrders,
+  acceptOrder,
 };

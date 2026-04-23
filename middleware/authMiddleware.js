@@ -35,4 +35,12 @@ const admin = (req, res, next) => {
   }
 };
 
-export { protect, admin };
+const driver = (req, res, next) => {
+  if (req.user && req.user.isDriver) {
+    next();
+  } else {
+    res.status(401).json({ message: 'Not authorized as a driver' });
+  }
+};
+
+export { protect, admin, driver };
