@@ -1,6 +1,7 @@
 import Order from '../models/orderModel.js';
 import Product from '../models/productModel.js';
 import Restaurant from '../models/restaurantModel.js';
+import { createNotification } from './notificationController.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -126,6 +127,7 @@ const updateOrderToDelivered = async (req, res) => {
     const updatedOrder = await order.save();
     
     req.app.get('io').to(`order_${order._id}`).emit('statusUpdate', updatedOrder);
+    await createNotification(order.user, `Your order #${order._id.toString().slice(-6).toUpperCase()} has been delivered! 🎉`, order._id);
 
     res.json(updatedOrder);
   } else {
@@ -159,7 +161,8 @@ const acceptOrder = async (req, res) => {
     const updatedOrder = await order.save();
     
     req.app.get('io').to(`order_${order._id}`).emit('statusUpdate', updatedOrder);
-    
+    await createNotification(order.user, `Your order #${order._id.toString().slice(-6).toUpperCase()} has been accepted and is being prepared! 🍳`, order._id);
+
     res.json(updatedOrder);
   } else {
     res.status(404).json({ message: 'Order not found' });

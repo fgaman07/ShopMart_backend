@@ -65,7 +65,43 @@ const getUserProfile = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: user.phone,
+      addresses: user.addresses,
       isAdmin: user.isAdmin,
+      isVendor: user.isVendor,
+      isDriver: user.isDriver,
+    });
+  } else {
+    res.status(404).json({ message: 'User not found' });
+  }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
+const updateUserProfile = async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  if (user) {
+    user.name = req.body.name || user.name;
+    user.email = req.body.email || user.email;
+    user.phone = req.body.phone !== undefined ? req.body.phone : user.phone;
+    if (req.body.addresses !== undefined) {
+      user.addresses = req.body.addresses;
+    }
+    if (req.body.password) {
+      user.password = req.body.password;
+    }
+
+    const updatedUser = await user.save();
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      addresses: updatedUser.addresses,
+      isAdmin: updatedUser.isAdmin,
+      token: generateToken(updatedUser._id),
     });
   } else {
     res.status(404).json({ message: 'User not found' });
@@ -131,4 +167,4 @@ const updateUser = async (req, res) => {
   }
 };
 
-export default { authUser, registerUser, getUserProfile, getUsers, deleteUser, getUserById, updateUser };
+export default { authUser, registerUser, getUserProfile, updateUserProfile, getUsers, deleteUser, getUserById, updateUser };
